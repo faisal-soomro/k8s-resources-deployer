@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: k8s-resource-deployer
+  name: k8s-resource-deployer
+spec:
+  serviceAccountName: k8s-deployer
+  containers:
+  - image: faisalsoomro/k8s-resource-deployer:v1 #python:3.9
+    name: k8s-resource-deployer
+    command: ["sleep"]
+    args:
+      - "9000"
