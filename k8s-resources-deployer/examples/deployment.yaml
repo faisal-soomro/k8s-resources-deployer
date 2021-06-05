@@ -1,25 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: k8s-resource-deployer
+  name: flask-hello
   labels:
-    app: k8s-resource-deployer
+    app: flask-hello
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: k8s-resource-deployer
+      app: flask-hello
   template:
     metadata:
       labels:
-        app: k8s-resource-deployer
+        app: flask-hello
     spec:
       containers:
-      - name: k8s-resource-deployer
-        image: python:3.9
-        command: ["sleep"]
-        args:
-        - "9000"
+      - name: flask-hello
+        image: faisalsoomro/flask-hello-app
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         resources: {}

@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    app: k8s-resource-deployer
-  name: k8s-resource-deployer
+    app: flask-hello
+  name: flask-hello
+  namespace: frontend-team
 spec:
-  serviceAccountName: k8s-deployer
   containers:
-  - image: faisalsoomro/k8s-resource-deployer:v1 #python:3.9
-    name: k8s-resource-deployer
-    command: ["sleep"]
-    args:
-      - "9000"
+  - image: faisalsoomro/flask-hello-app
+    name: flask-hello
+    ports:
+      - containerPort: 8080
+    resources: {}

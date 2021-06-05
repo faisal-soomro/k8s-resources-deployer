@@ -2,14 +2,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: k8s-resource-deployer
-  name: k8s-resource-deployer
+    app: flask-hello
+  name: flask-hello-svc
 spec:
   ports:
-  - port: 80
+  - port: 8080
     protocol: TCP
-    targetPort: 80
-    nodePort: 30080
+    targetPort: 8080
+    nodePort: 32080
   selector:
-    app: k8s-resource-deployer
+    app: flask-hello
   type: NodePort
