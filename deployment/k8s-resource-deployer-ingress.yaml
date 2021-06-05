@@ -1,0 +1,37 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: k8s-resource-deployer-ingress
+  namespace: backend-team
+spec:
+  rules:
+    - host: k8s-resource-deployer.backend.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: k8s-resource-deployer
+                port:
+                  number: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: k8s-resource-deployer-ingress
+  namespace: frontend-team
+spec:
+  rules:
+    - host: k8s-resource-deployer.frontend.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: k8s-resource-deployer
+                port:
+                  number: 8080
