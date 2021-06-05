@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: k8s-resource-deployer
+  name: k8s-resource-deployer
+  #namespace: UPDATE_ME_WITH_REQUIRED_NAMESPACE
+spec:
+  containers:
+  - image: faisalsoomro/k8s-resource-deployer:v1.1
+    name: k8s-resource-deployer
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    resources: {}
+  serviceAccountName: k8s-deployer
