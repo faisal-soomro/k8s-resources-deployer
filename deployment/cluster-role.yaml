@@ -21,3 +21,15 @@ rules:
   resources:
   - services
   verbs: ["list", "get", "create", "patch", "update"]
+
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs: ["list", "get", "create", "patch", "update"]
+
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs: ["list", "get", "create", "patch", "update"]
