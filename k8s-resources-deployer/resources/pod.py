@@ -25,18 +25,19 @@ def create_pod(api_group, namespace, resource_definition, logger):
 
     # Verifying the namespace before deploying
     if ("namespace" in pod_metadata) and (pod_metadata["namespace"] != namespace):
-        logger.info("The pod can only be deployed to '{}' namespace, (namespace in resource definition: '{}')" \
+        logger.warn("The pod can only be deployed to '{}' namespace, (namespace in resource definition: '{}')" \
                     "fixing the namespace in the resource definition".format(namespace, pod_metadata["namespace"]))
         resource_definition["metadata"]["namespace"] = namespace
-        logger.info("Updated Resource defintion for pod: {}".format(resource_definition))
+        logger.warn("Updated Resource defintion for pod: {}".format(resource_definition))
     
     # Creating New Pod or Updating if already deployed
     if (pod_name not in deployed_pods):
         logger.info("'{}' not available pods list, deploying it".format(pod_name))
         try:
-            logger.info("Deploying '{}' pod in '{}' namespace".format(pod_name, namespace))
+            logger.debug("Deploying '{}' pod in '{}' namespace".format(pod_name, namespace))
             response = api_group.create_namespaced_pod(body=resource_definition, namespace=namespace)
             logger.info("Pod '{}' created successfully".format(response.metadata.name))
+            return("Pod '{}' created successfully".format(response.metadata.name))
         except exceptions.ApiException as error:
             error_body = json.loads(error.body)
             logger.error(error_body["message"])
@@ -45,6 +46,7 @@ def create_pod(api_group, namespace, resource_definition, logger):
         try:
             response = api_group.patch_namespaced_pod(name=pod_name ,body=resource_definition, namespace=namespace)
             logger.info("Pod '{}' patched successfully".format(response.metadata.name))
+            return("Pod '{}' patched successfully".format(response.metadata.name))
         except exceptions.ApiException as error:
             error_body = json.loads(error.body)
             logger.error(error_body["message"])

@@ -25,18 +25,19 @@ def create_configmap(api_group, namespace, resource_definition, logger):
 
     # Verifying the namespace before deploying
     if ("namespace" in configmap_metadata) and (configmap_metadata["namespace"] != namespace):
-        logger.info("The configmap can only be deployed to '{}' namespace, (namespace in resource definition: '{}')" \
+        logger.warn("The configmap can only be deployed to '{}' namespace, (namespace in resource definition: '{}') " \
                     "fixing the namespace in the resource definition".format(namespace, configmap_metadata["namespace"]))
         resource_definition["metadata"]["namespace"] = namespace
-        logger.info("Updated Resource defintion for configmap: {}".format(resource_definition))
+        logger.warn("Updated Resource defintion for configmap: {}".format(resource_definition))
     
     # Creating New ConfigMap or Updating if already deployed
     if (configmap_name not in deployed_configmaps):
         logger.info("'{}' not available configmaps list, deploying it".format(configmap_name))
         try:
-            logger.info("Deploying '{}' configmap in '{}' namespace".format(configmap_name, namespace))
+            logger.debug("Deploying '{}' configmap in '{}' namespace".format(configmap_name, namespace))
             response = api_group.create_namespaced_config_map(body=resource_definition, namespace=namespace)
             logger.info("ConfigMap '{}' created successfully".format(response.metadata.name))
+            return("ConfigMap '{}' created successfully".format(response.metadata.name))
         except exceptions.ApiException as error:
             error_body = json.loads(error.body)
             logger.error(error_body["message"])
@@ -45,6 +46,7 @@ def create_configmap(api_group, namespace, resource_definition, logger):
         try:
             response = api_group.replace_namespaced_config_map(name=configmap_name ,body=resource_definition, namespace=namespace)
             logger.info("ConfigMap '{}' replaced successfully".format(response.metadata.name))
+            return("ConfigMap '{}' replaced successfully".format(response.metadata.name))
         except exceptions.ApiException as error:
             error_body = json.loads(error.body)
             logger.error(error_body["message"])

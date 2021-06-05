@@ -25,18 +25,19 @@ def create_service(api_group, namespace, resource_definition, logger):
 
     # Verifying the namespace before deploying
     if ("namespace" in service_metadata) and (service_metadata["namespace"] != namespace):
-        logger.info("The service can only be deployed to '{}' namespace, (namespace in resource definition: '{}')" \
+        logger.warn("The service can only be deployed to '{}' namespace, (namespace in resource definition: '{}')" \
                     "fixing the namespace in the resource definition".format(namespace, service_metadata["namespace"]))
         resource_definition["metadata"]["namespace"] = namespace
-        logger.info("Updated Resource defintion for service: {}".format(resource_definition))
+        logger.warn("Updated Resource defintion for service: {}".format(resource_definition))
     
     # Creating New Service or Updating if already deployed
     if (service_name not in deployed_services):
         logger.info("'{}' not available in services list, deploying it".format(service_name))
         try:
-            logger.info("Deploying '{}' service in '{}' namespace".format(service_name, namespace))
+            logger.debug("Deploying '{}' service in '{}' namespace".format(service_name, namespace))
             response = api_group.create_namespaced_service(body=resource_definition, namespace=namespace)
             logger.info("Service '{}' created successfully".format(response.metadata.name))
+            return("Service '{}' created successfully".format(response.metadata.name))
         except exceptions.ApiException as error:
             error_body = json.loads(error.body)
             logger.error(error_body["message"])
@@ -45,6 +46,7 @@ def create_service(api_group, namespace, resource_definition, logger):
         try:
             response = api_group.patch_namespaced_service(name=service_name ,body=resource_definition, namespace=namespace)
             logger.info("Service '{}' patched successfully".format(response.metadata.name))
+            return("Service '{}' patched successfully".format(response.metadata.name))
         except exceptions.ApiException as error:
             error_body = json.loads(error.body)
             logger.error(error_body["message"])
