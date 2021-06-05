@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        <h1>{{ title }} - {{ namespace }}</h1>
+        <form action="{{ url_for('index') }}" method="POST">
+            <p>Please provide the kubernetes resource definition (yaml format) in the below form:</p>
+            <p>
+                <textarea name="yaml-definition" rows="20" cols="50" value={{yaml_string}}></textarea>
+            </p>
+            <input type="submit">
+            {% if response %}
+                <h3>Responses from Server Side:</h3>
+                {% if (response is iterable) and (response is not string) %}
+                    {% for r in response %}
+                    <p>{{ r }}</p>
+                    {% endfor %}
+                {% else %}
+                <p>{{ response }}</p>
+                {% endif %}
+            {% endif %}
+        </form>
+    </body>
+</html>

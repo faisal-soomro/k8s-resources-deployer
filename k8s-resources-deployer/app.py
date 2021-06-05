@@ -2,35 +2,42 @@
 
 import sys
 import os
-import yaml
+import io
 import logging
 import configparser
+from traceback import print_exc
 from kubernetes import client, config
-from resources import pod, deployment, service, configmap, secret
+from resources import yaml_parser, deployer
+from flask import Flask, render_template, request
+
+
 
 # Setting logging configurations
 log_level = logging.INFO
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=log_level)
+log_format = "%(asctime)s - %(levelname)s - %(message)s"
+logging.basicConfig(format=log_format, level=log_level)
 log = logging.getLogger()
+
+log_capture_string = io.StringIO()
+console_handler = logging.StreamHandler(log_capture_string)
+console_handler_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s EOL")
+console_handler.setFormatter(console_handler_formatter)
+console_handler.setLevel(logging.WARN)
+log.addHandler(console_handler)
+
+
 
 # Reading from config.ini
 try:
     config_file = configparser.ConfigParser()
     config_file.read("config.ini")
     kubernetes_section = config_file["kubernetes"]
-    pod_section = config_file["pod"]
-    pod_resource_path = pod_section["resource_path"]
-    deployment_section = config_file["deployment"]
-    deployment_resource_path = deployment_section["resource_path"]
-    service_section = config_file["service"]
-    service_resource_path = service_section["resource_path"]
-    configmap_section = config_file["configmap"]
-    configmap_resource_path = configmap_section["resource_path"]
-    secret_section = config_file["secret"]
-    secret_resource_path = secret_section["resource_path"]
+except :
+    print_exc()
+    log.error("Failed to load config.ini, Please verify the config.ini and try again, exiting...")
+    sys.exit(-1)
 
-except e:
-    log.error(e)
+
 
 # Loading kubernetes configurations
 try:
@@ -40,67 +47,54 @@ try:
         with open(namespace_path) as file:
             namespace = file.read().strip()
             file.close()
+        if (namespace != ""):
+            log.info("Fetched namespace value as {} from {}".format(namespace, namespace_path))
+        else:
+            log.error("Namespace is not fetched successfully and cannot proceed further, exiting...")
+            sys.exit(-1)
     else:
         config.load_kube_config()
         namespace = kubernetes_section["namespace"]
+        if (namespace != ""):
+            log.info("Fetched namespace value as {} from configurations file".format(namespace))
+        else:
+            log.error("Namespace is not fetched successfully and cannot proceed further, exiting...")
+            sys.exit(-1)
+
+    # Loading Api Resource Groups for kubernetes resources
     v1 = client.CoreV1Api()
     appsv1 = client.AppsV1Api()
-except e:
-    log.error(e)
+except :
+    print_exc()
+    log.error("Failed to load configurations, exiting...")
     sys.exit(-1)
 
 
-def parse_yaml(path):
-    try:
-        with open(os.path.join(os.path.dirname(__file__), path)) as file:
-            yamlbody = yaml.safe_load(file)
-            file.close()
-            return yamlbody
-    except FileNotFoundError as error:
-        log.error(error)
-        log.error(error.strerror)
-        sys.exit(-1)
-    except yaml.parser.ParserError as error:
-        log.error(error)
-        sys.exit(-1)
+
+# Creating Flask Configurations
+app = Flask(__name__)
+
+@app.route('/', methods=['GET','POST'])
+def index():
+    if request.method == 'POST':
+        yaml_string = request.form.get("yaml-definition")
+        log.debug("Received Data: {}".format(yaml_string))
+        parsed_yaml = yaml_parser.parse_string(yaml_string=yaml_string, logger=log)
+        if (parsed_yaml != -1):
+            response = deployer.deploy_resource(parsed_yaml=parsed_yaml, logger=log, log_capture_string=log_capture_string,
+                                                api_v1=v1, api_apps_v1=appsv1, namespace=namespace)
+            return render_template('index.html', title="k8s-resource-deployer", namespace=namespace, response=response)
+        else:
+            response="Unable to parse yaml resource, please verify and deploy again"
+            return render_template('index.html', title="k8s-resource-deployer", namespace=namespace, response=response)
+    return render_template('index.html', title="k8s-resource-deployer", namespace=namespace)
 
 
 
-
+# Defining and calling main() method
 def main():
-    # Pod resources
-    log.debug("Reading Pod Definition from {}".format(pod_resource_path))
-    yaml_parsed = parse_yaml(pod_resource_path)
-    log.debug("Resource defintion for pod: {}".format(yaml_parsed))
-    pod.create_pod(api_group=v1, namespace=namespace, resource_definition=yaml_parsed, logger=log)
-
-
-    # Deployment resources
-    log.debug("Reading Deployment Definition from {}".format(deployment_resource_path))
-    yaml_parsed = parse_yaml(deployment_resource_path)
-    log.debug("Resource defintion for deployment: {}".format(yaml_parsed))
-    deployment.create_deployment(api_group=appsv1, namespace="backend-team", resource_definition=yaml_parsed, logger=log)
-
-
-    # Service resources
-    log.debug("Reading Service Definition from {}".format(service_resource_path))
-    yaml_parsed = parse_yaml(service_resource_path)
-    log.debug("Resource defintion for service: {}".format(yaml_parsed))
-    service.create_service(api_group=v1, namespace="backend-team", resource_definition=yaml_parsed, logger=log)
-
-
-    # ConfigMap resources
-    log.debug("Reading ConfigMap Definition from {}".format(configmap_resource_path))
-    yaml_parsed = parse_yaml(configmap_resource_path)
-    log.debug("Resource defintion for configmap: {}".format(yaml_parsed))
-    configmap.create_configmap(api_group=v1, namespace="backend-team", resource_definition=yaml_parsed, logger=log)
-
-
-    # Secret resources
-    log.debug("Reading Secret Definition from {}".format(secret_resource_path))
-    yaml_parsed = parse_yaml(secret_resource_path)
-    log.debug("Resource defintion for secret: {}".format(yaml_parsed))
-    secret.create_secret(api_group=v1, namespace="backend-team", resource_definition=yaml_parsed, logger=log)
+    # app.debug = True
+    app.run(host="0.0.0.0", port=8080)
 
 if __name__ == "__main__":
     main()
