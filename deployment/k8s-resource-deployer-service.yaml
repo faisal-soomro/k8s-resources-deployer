@@ -1,16 +1,33 @@
+---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     app: k8s-resource-deployer
   name: k8s-resource-deployer
-  #namespace: UPDATE_ME_WITH_REQUIRED_NAMESPACE
+  namespace: backend-team
 spec:
   ports:
-  - nodePort: 30080
-    port: 8080
+  - port: 8080
     protocol: TCP
     targetPort: 8080
   selector:
     app: k8s-resource-deployer
-  type: NodePort
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: k8s-resource-deployer
+  name: k8s-resource-deployer
+  namespace: frontend-team
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: k8s-resource-deployer
+  type: ClusterIP

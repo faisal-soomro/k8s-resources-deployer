@@ -1,8 +1,36 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: k8s-resource-deployer
-  #namespace: UPDATE_ME_WITH_REQUIRED_NAMESPACE
+  namespace: backend-team
+  labels:
+    app: k8s-resource-deployer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: k8s-resource-deployer
+  template:
+    metadata:
+      labels:
+        app: k8s-resource-deployer
+    spec:
+      serviceAccountName: k8s-deployer
+      containers:
+      - name: k8s-resource-deployer
+        image: faisalsoomro/k8s-resource-deployer:v1.1
+        ports:
+        - containerPort: 8080
+        resources: {}
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-resource-deployer
+  namespace: frontend-team
   labels:
     app: k8s-resource-deployer
 spec:
