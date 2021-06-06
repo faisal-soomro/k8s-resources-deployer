@@ -18,7 +18,7 @@ This tool is developed to assist developers in deploying kubernetes resources qu
 - The teams will deploy resources through k8s-resources-deployer by providing yaml based manifests definitions.
 
 
-***The details about architecture and [High Level Design is available here](docs/architecture.md) and the [Low Level Design details can be accessed here](docs/design-lowlevel.md).***
+***The details about [Architecture and High Level Design is available here](docs/architecture.md) and the [Low Level Design details can be accessed here](docs/design-lowlevel.md).***
 
 
 ## Pre-requisites
@@ -56,7 +56,7 @@ This section quickly describes on getting the kubernetes cluster ready through m
   commit: 9f1e482427589ff8451c4723b6ba53bb9742fbb1
   ```
 
-- Create the minikube cluster with `minikube start` command. The default cluster will be created with 2 vCPUs, 2GB Memory and 20GB Hard Disk with kvm2 driver for Linux. The cluster for this document is created through docker driver using the following command:
+- Create the minikube cluster with `minikube start` command. The default cluster will be created with *2 vCPUs, 2GB Memory and 20GB Hard Disk with kvm2 driver for Linux*. The cluster for this document is created through docker driver using the following command:
   ```bash
   minikube start --driver=docker
   ```
