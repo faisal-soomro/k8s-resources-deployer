@@ -18,6 +18,9 @@ This tool is developed to assist developers in deploying kubernetes resources qu
 - The teams will deploy resources through k8s-resources-deployer by providing yaml based manifests definitions.
 
 
+***The details about architecture and [High Level Design is available here](docs/architecture.md) and the [Low Level Design details can be accessed here](docs/design-lowlevel.md).***
+
+
 ## Pre-requisites
 
 The pre-requisite for this tool is access to a kubernetes cluster with permissions of creating/updating the following resources:
