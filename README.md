@@ -11,8 +11,9 @@ A flask based tool for creating basic kubernetes resources i.e:
 
 This tool is developed to assist developers in deploying kubernetes resources quickly and also restrict their access to the kubernetes cluster to their assigned namespace. The following assumptions have been made while deploying this tool:
 
+- The `k8s-resources-deployer` tool will run inside kubernetes cluster, hence config.ini file hasn't been configured to be fetch kubernetes cluster configurations. A pre-work would be required to run it in a standalone container for getting kubernetes cluster configurations.
 - The teams are assigned a specific `namespace` in the kubernetes cluster and they will only deploy the resources to their assigned namespace.
-- The `k8s-resources-deployer` runs in the same namespace the team is assigned, and the restriction of not accessing other namespaces is made sure through kubernetes RBAC policies.
+- The k8s-resources-deployer runs in the same namespace the team is assigned, and the restriction of not accessing other namespaces is made sure through kubernetes RBAC policies.
 - The teams will be able to access the k8s-resources-deployer through dns hostname, which is in-turn managed through ingress resource. The `nginx-ingress` is used for the current version.
 - The teams will deploy resources through k8s-resources-deployer by providing yaml based manifests definitions.
 
@@ -138,6 +139,7 @@ The k8s-resources-deployer is deployed in 2 separate namespaces and accessible t
 - Decouple the k8s-resources-deployer instance from the namespace in which workloads lies, so the resource presence in the cluster is abstracted away(Minor Release).
 - Adding authentication to allow only authenticated users to access respective k8s-resources-deloyer instance (Major Release).
 ### Features
+- The k8s-resources-deployer tool can run independent of the infrastrucutre (i.e Docker Engine or Kubernetes or any other serverless platform with container support) if the kubernetes cluster configurations are provided (Minor Release).
 - Better response handling for web form after submitting the yaml resource definition (Minor Release).
 - Support for more kubernetes resources (Incremental updates as Minor Releases).
 - Developers use web based form to deploy resources instead of providing the yaml based manifests, which are error-prone (Major Release).
